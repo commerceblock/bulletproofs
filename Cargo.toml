@@ -10,10 +10,12 @@ authors = [
 crate-type = ["lib"]
 
 [dependencies]
-curv = { git = "https://github.com/commerceblock/curv" , tag = "v0.2.7", features =  ["ec_secp256k1"]}
+curv = { git = "https://github.com/commerceblock/curv" , tag = "v0.2.8", features =  ["ec_secp256k1"]}
 itertools = "0.9.0"
 serde = "1.0"
 serde_derive = "1.0"
+num-traits = "0.2"
+num-integer = "0.1.44"
 
 [dev-dependencies]
 criterion = "0.2"

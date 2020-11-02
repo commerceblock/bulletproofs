@@ -29,6 +29,8 @@ use curv::cryptographic_primitives::hashing::traits::*;
 use curv::elliptic::curves::traits::*;
 use curv::BigInt;
 use curv::{FE, GE};
+use num_traits::{One, Zero};
+use num_integer::Integer;
 use itertools::iterate;
 use proofs::range_proof::generate_random_point;
 use proofs::weighted_inner_product::WeightedInnerProdArg;
@@ -107,7 +109,7 @@ impl RangeProofWIP {
 
         let N = g_vec.len();
         let two = BigInt::from(2);
-        let one = BigInt::from(1);
+        let one = BigInt::one();
         let order = FE::q();
 
         // All of the input vectors must have the same length.
@@ -123,7 +125,7 @@ impl RangeProofWIP {
         let aL = (0..nm)
             .map(|i| {
                 let shr_secret = secret_agg.clone().shr(i);
-                shr_secret.modulus(&two)
+                shr_secret.mod_floor(&two)
             })
             .collect::<Vec<BigInt>>();
         let aR = (0..nm)
@@ -276,7 +278,7 @@ impl RangeProofWIP {
         let H = stmt.H;
 
         let two = BigInt::from(2);
-        let one = BigInt::from(1);
+        let one = BigInt::one();
         let order = FE::q();
 
         let y = HSha256::create_hash_from_ge(&[&self.A]);
@@ -393,7 +395,7 @@ impl RangeProofWIP {
         let order = FE::q();
         let lg_nm = wip.L.len();
         let two = BigInt::from(2);
-        let one = BigInt::from(1);
+        let one = BigInt::one();
 
         // All of the input vectors must have the same length.
         assert_eq!(G.len(), nm);
@@ -443,7 +445,7 @@ impl RangeProofWIP {
             .collect::<Vec<BigInt>>();
 
         // compute powers of y_inv
-        let y_inv = BigInt::mod_inv(&y_bn, &order);
+        let y_inv = BigInt::mod_inv(&y_bn, &order).ok_or(RangeProofError).unwrap();
         let powers_yinv = iterate(y_inv.clone(), |i| i.clone() * y_inv.clone())
             .take(nm)
             .collect::<Vec<BigInt>>();
@@ -494,7 +496,7 @@ impl RangeProofWIP {
             // so u_{lg(i)+1} = is indexed by (lg_nm-1) - lg_i
             let x_lg_i_sq = x_sq_vec[(lg_nm - 1) - lg_i].clone();
             s.push(s[i - k].clone() * x_lg_i_sq);
-            let s_inv_i = BigInt::mod_inv(&s[i], &order);
+            let s_inv_i = BigInt::mod_inv(&s[i], &order).ok_or(RangeProofError).unwrap();
             let si_yi = BigInt::mod_mul(&s[i], &powers_yinv[i - 1], &order);
 
             sg.push(si_yi);
@@ -597,11 +599,12 @@ impl RangeProofWIP {
 
 #[cfg(test)]
 mod tests {
-    use curv::arithmetic::traits::Samplable;
+    use curv::arithmetic::traits::{Converter, Samplable};
     use curv::elliptic::curves::traits::*;
     use curv::BigInt;
     use curv::{FE, GE};
     use proofs::range_proof_wip::{RangeProofWIP, StatementRP};
+    use num_traits::Pow;
 
     pub fn test_helper(seed: &BigInt, n: usize, m: usize) {
         // generate stmt
@@ -610,7 +613,7 @@ mod tests {
         // generate witness
         let G = stmt.G;
         let H = stmt.H;
-        let range = BigInt::from(2).pow(n as u32);
+        let range = BigInt::from(2).pow(n);
         let v_vec = (0..m)
             .map(|_| ECScalar::from(&BigInt::sample_below(&range)))
             .collect::<Vec<FE>>();
@@ -637,7 +640,7 @@ mod tests {
         // generate witness
         let G = stmt.G;
         let H = stmt.H;
-        let range = BigInt::from(2).pow(n as u32);
+        let range = BigInt::from(2).pow(n);
         let v_vec = (0..m)
             .map(|_| ECScalar::from(&BigInt::sample_below(&range)))
             .collect::<Vec<FE>>();
@@ -663,14 +666,14 @@ mod tests {
         // num of proofs
         let m = 4;
         let KZen: &[u8] = &[75, 90, 101, 110];
-        let kzen_label = BigInt::from(KZen);
+        let kzen_label = BigInt::from_vec(KZen);
 
         let stmt = StatementRP::generate_bases(&kzen_label, m, n);
 
         // generate witness
         let G = stmt.G;
         let H = stmt.H;
-        let range = BigInt::from(2).pow(n as u32);
+        let range = BigInt::from(2).pow(n);
         let v_vec = (0..m)
             .map(|_| ECScalar::from(&BigInt::sample_below(&range)))
             .collect::<Vec<FE>>();
@@ -696,19 +699,19 @@ mod tests {
         // num of proofs
         let m = 4;
         let KZen: &[u8] = &[75, 90, 101, 110];
-        let kzen_label = BigInt::from(KZen);
+        let kzen_label = BigInt::from_vec(KZen);
 
         let stmt = StatementRP::generate_bases(&kzen_label, m, n);
 
         // generate witness
         let G = stmt.G;
         let H = stmt.H;
-        let range = BigInt::from(2).pow(n as u32);
+        let range = BigInt::from(2).pow(n);
         let mut v_vec = (0..m - 1)
             .map(|_| ECScalar::from(&BigInt::sample_below(&range)))
             .collect::<Vec<FE>>();
 
-        let bad_v = BigInt::from(2).pow(33);
+        let bad_v = BigInt::from(2).pow(33 as u32);
         v_vec.push(ECScalar::from(&bad_v));
 
         let r_vec = (0..m).map(|_| ECScalar::new_random()).collect::<Vec<FE>>();
@@ -728,28 +731,28 @@ mod tests {
     #[test]
     pub fn test_batch_2_wip_range_proof_16() {
         let KZen: &[u8] = &[75, 90, 101, 110];
-        let kzen_label = BigInt::from(KZen);
+        let kzen_label = BigInt::from_vec(KZen);
         test_helper(&kzen_label, 16, 2);
     }
 
     #[test]
     pub fn test_batch_1_wip_range_proof_8() {
         let KZen: &[u8] = &[75, 90, 101, 110];
-        let kzen_label = BigInt::from(KZen);
+        let kzen_label = BigInt::from_vec(KZen);
         test_helper(&kzen_label, 8, 1);
     }
 
     #[test]
     pub fn test_batch_4_wip_range_proof_64() {
         let KZen: &[u8] = &[75, 90, 101, 110];
-        let kzen_label = BigInt::from(KZen);
+        let kzen_label = BigInt::from_vec(KZen);
         test_helper(&kzen_label, 64, 4);
     }
 
     #[test]
     pub fn test_batch_agg_4_wip_range_proof_64() {
         let KZen: &[u8] = &[75, 90, 101, 110];
-        let kzen_label = BigInt::from(KZen);
+        let kzen_label = BigInt::from_vec(KZen);
         test_helper_aggregate(&kzen_label, 64, 4);
     }
 }

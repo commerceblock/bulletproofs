@@ -28,6 +28,7 @@ use curv::elliptic::curves::traits::*;
 use curv::BigInt;
 use curv::{FE, GE};
 use itertools::iterate;
+use num_traits::{One, Zero};
 
 use Errors::{self, WeightedInnerProdError};
 
@@ -66,7 +67,7 @@ impl WeightedInnerProdArg {
         assert!(n.is_power_of_two());
 
         // compute powers of y
-        let y_inv = BigInt::mod_inv(&y, &order);
+        let y_inv = BigInt::mod_inv(&y, &order).ok_or(WeightedInnerProdError).unwrap();
         let powers_y = iterate(y.clone(), |i| i.clone() * y)
             .take(n)
             .collect::<Vec<BigInt>>();
@@ -157,7 +158,7 @@ impl WeightedInnerProdArg {
             let x = HSha256::create_hash_from_ge(&[&L, &R, &g, &h]);
             let x_bn = x.to_big_int();
             let x_sq_bn = BigInt::mod_mul(&x_bn, &x_bn, &order);
-            let x_sq_inv_bn = BigInt::mod_inv(&x_sq_bn, &order);
+            let x_sq_inv_bn = BigInt::mod_inv(&x_sq_bn, &order).ok_or(WeightedInnerProdError).unwrap();
             let x_inv_fe = x.invert();
 
             let a_hat = (0..n)
@@ -259,9 +260,9 @@ impl WeightedInnerProdArg {
                 R: R_vec,
                 a_tag: A,
                 b_tag: B,
-                r_prime: r_prime,
-                s_prime: s_prime,
-                delta_prime: delta_prime,
+                r_prime,
+                s_prime,
+                delta_prime,
             };
         }
     }
@@ -285,7 +286,7 @@ impl WeightedInnerProdArg {
         assert!(n.is_power_of_two());
 
         // compute powers of y
-        let y_inv = BigInt::mod_inv(&y, &order);
+        let y_inv = BigInt::mod_inv(&y, &order).ok_or(WeightedInnerProdError).unwrap();
         let powers_yinv = iterate(y_inv.clone(), |i| i.clone() * y_inv.clone())
             .take(n)
             .collect::<Vec<BigInt>>();
@@ -397,7 +398,7 @@ impl WeightedInnerProdArg {
         assert!(n.is_power_of_two());
 
         // compute powers of y
-        let y_inv = BigInt::mod_inv(&y, &order);
+        let y_inv = BigInt::mod_inv(&y, &order).ok_or(WeightedInnerProdError).unwrap();
         let powers_yinv = iterate(y_inv.clone(), |i| i.clone() * y_inv.clone())
             .take(n)
             .collect::<Vec<BigInt>>();
@@ -454,7 +455,7 @@ impl WeightedInnerProdArg {
             // so u_{lg(i)+1} = is indexed by (lg_n-1) - lg_i
             let x_lg_i_sq = x_sq_vec[(lg_n - 1) - lg_i].clone();
             s.push(s[i - k].clone() * x_lg_i_sq);
-            let s_inv_i = BigInt::mod_inv(&s[i], &order);
+            let s_inv_i = BigInt::mod_inv(&s[i], &order).ok_or(WeightedInnerProdError).unwrap();
             let si_yi = BigInt::mod_mul(&s[i], &powers_yinv[i - 1], &order);
 
             sg.push(si_yi);
@@ -543,10 +544,11 @@ mod tests {
     use proofs::range_proof::generate_random_point;
     use proofs::weighted_inner_product::weighted_inner_product;
     use proofs::weighted_inner_product::WeightedInnerProdArg;
+    use num_traits::{One, Zero};
 
     fn test_helper(n: usize) {
         let KZen: &[u8] = &[75, 90, 101, 110];
-        let kzen_label = BigInt::from(KZen);
+        let kzen_label = BigInt::from_vec(KZen);
 
         let g_vec = (0..n)
             .map(|i| {
@@ -637,7 +639,7 @@ mod tests {
 
     fn test_helper_fast_verify(n: usize) {
         let KZen: &[u8] = &[75, 90, 101, 110];
-        let kzen_label = BigInt::from(KZen);
+        let kzen_label = BigInt::from_vec(KZen);
 
         let g_vec = (0..n)
             .map(|i| {
@@ -728,7 +730,7 @@ mod tests {
 
     fn test_helper_non_power_2(m: usize, n: usize, a: &[BigInt], b: &[BigInt]) {
         let KZen: &[u8] = &[75, 90, 101, 110];
-        let kzen_label = BigInt::from(KZen);
+        let kzen_label = BigInt::from_vec(KZen);
 
         let g_vec = (0..n)
             .map(|i| {
@@ -809,11 +811,11 @@ mod tests {
         let a: Vec<BigInt> = vec![
             BigInt::from(3),
             BigInt::from(2),
-            BigInt::from(1),
-            BigInt::from(0),
+            BigInt::one(),
+            BigInt::zero(),
         ];
         let b: Vec<BigInt> = vec![
-            BigInt::from(1),
+            BigInt::one(),
             BigInt::from(2),
             BigInt::from(3),
             BigInt::from(4),
