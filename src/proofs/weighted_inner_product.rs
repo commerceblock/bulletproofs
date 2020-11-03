@@ -67,7 +67,7 @@ impl WeightedInnerProdArg {
         assert!(n.is_power_of_two());
 
         // compute powers of y
-        let y_inv = BigInt::mod_inv(&y, &order).ok_or(WeightedInnerProdError).unwrap();
+        let y_inv = BigInt::mod_inv(&y, &order);
         let powers_y = iterate(y.clone(), |i| i.clone() * y)
             .take(n)
             .collect::<Vec<BigInt>>();
@@ -158,7 +158,7 @@ impl WeightedInnerProdArg {
             let x = HSha256::create_hash_from_ge(&[&L, &R, &g, &h]);
             let x_bn = x.to_big_int();
             let x_sq_bn = BigInt::mod_mul(&x_bn, &x_bn, &order);
-            let x_sq_inv_bn = BigInt::mod_inv(&x_sq_bn, &order).ok_or(WeightedInnerProdError).unwrap();
+            let x_sq_inv_bn = BigInt::mod_inv(&x_sq_bn, &order);
             let x_inv_fe = x.invert();
 
             let a_hat = (0..n)
@@ -286,7 +286,7 @@ impl WeightedInnerProdArg {
         assert!(n.is_power_of_two());
 
         // compute powers of y
-        let y_inv = BigInt::mod_inv(&y, &order).ok_or(WeightedInnerProdError).unwrap();
+        let y_inv = BigInt::mod_inv(&y, &order);
         let powers_yinv = iterate(y_inv.clone(), |i| i.clone() * y_inv.clone())
             .take(n)
             .collect::<Vec<BigInt>>();
@@ -398,7 +398,7 @@ impl WeightedInnerProdArg {
         assert!(n.is_power_of_two());
 
         // compute powers of y
-        let y_inv = BigInt::mod_inv(&y, &order).ok_or(WeightedInnerProdError).unwrap();
+        let y_inv = BigInt::mod_inv(&y, &order);
         let powers_yinv = iterate(y_inv.clone(), |i| i.clone() * y_inv.clone())
             .take(n)
             .collect::<Vec<BigInt>>();
@@ -455,7 +455,7 @@ impl WeightedInnerProdArg {
             // so u_{lg(i)+1} = is indexed by (lg_n-1) - lg_i
             let x_lg_i_sq = x_sq_vec[(lg_n - 1) - lg_i].clone();
             s.push(s[i - k].clone() * x_lg_i_sq);
-            let s_inv_i = BigInt::mod_inv(&s[i], &order).ok_or(WeightedInnerProdError).unwrap();
+            let s_inv_i = BigInt::mod_inv(&s[i], &order);
             let si_yi = BigInt::mod_mul(&s[i], &powers_yinv[i - 1], &order);
 
             sg.push(si_yi);

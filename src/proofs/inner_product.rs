@@ -24,6 +24,7 @@ use curv::BigInt;
 use curv::{FE, GE};
 use num_traits::{One, Zero};
 
+
 use Errors::{self, InnerProductError};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -301,7 +302,7 @@ impl InnerProductArg {
 
         let b_div_s: Vec<BigInt> = (0..n)
             .map(|i| {
-                let s_inv_i = BigInt::mod_inv(&s[i], &order).ok_or(InnerProductError).unwrap();
+                let s_inv_i = BigInt::mod_inv(&s[i], &order);
                 BigInt::mod_mul(&s_inv_i, &self.b_tag, &order)
             })
             .collect();

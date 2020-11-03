@@ -445,7 +445,7 @@ impl RangeProofWIP {
             .collect::<Vec<BigInt>>();
 
         // compute powers of y_inv
-        let y_inv = BigInt::mod_inv(&y_bn, &order).ok_or(RangeProofError).unwrap();
+        let y_inv = BigInt::mod_inv(&y_bn, &order);
         let powers_yinv = iterate(y_inv.clone(), |i| i.clone() * y_inv.clone())
             .take(nm)
             .collect::<Vec<BigInt>>();
@@ -496,7 +496,7 @@ impl RangeProofWIP {
             // so u_{lg(i)+1} = is indexed by (lg_nm-1) - lg_i
             let x_lg_i_sq = x_sq_vec[(lg_nm - 1) - lg_i].clone();
             s.push(s[i - k].clone() * x_lg_i_sq);
-            let s_inv_i = BigInt::mod_inv(&s[i], &order).ok_or(RangeProofError).unwrap();
+            let s_inv_i = BigInt::mod_inv(&s[i], &order);
             let si_yi = BigInt::mod_mul(&s[i], &powers_yinv[i - 1], &order);
 
             sg.push(si_yi);

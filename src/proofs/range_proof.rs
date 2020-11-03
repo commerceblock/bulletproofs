@@ -524,7 +524,7 @@ impl RangeProof {
         // regenerate challenges y, z, x, x_u from transcript
         let y = HSha256::create_hash_from_ge(&[&self.A, &self.S]);
         let y_bn = y.to_big_int();
-        let y_inv_bn = BigInt::mod_inv(&y_bn, &order).ok_or(RangeProofError).unwrap();
+        let y_inv_bn = BigInt::mod_inv(&y_bn, &order);
         let base_point: GE = ECPoint::generator();
         let yG: GE = base_point * &y;
         let z = HSha256::create_hash_from_ge(&[&yG]);
@@ -642,7 +642,7 @@ impl RangeProof {
 
         let b_times_sinv: Vec<BigInt> = (0..nm)
             .map(|i| {
-                let s_inv_i = BigInt::mod_inv(&s[i], &order).ok_or(RangeProofError).unwrap();
+                let s_inv_i = BigInt::mod_inv(&s[i], &order);
                 BigInt::mod_mul(&s_inv_i, &self.inner_product_proof.b_tag, &order)
             })
             .collect();
