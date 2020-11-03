@@ -22,8 +22,7 @@ use curv::cryptographic_primitives::hashing::traits::*;
 use curv::elliptic::curves::traits::*;
 use curv::BigInt;
 use curv::{FE, GE};
-use num_traits::{One, Zero};
-use num_integer::Integer;
+use curv::arithmetic::big_num::{One, Zero, Integer};
 use itertools::iterate;
 use proofs::inner_product::InnerProductArg;
 use std::ops::{Shl, Shr};
@@ -762,8 +761,7 @@ mod tests {
     use curv::{FE, GE};
     use proofs::range_proof::generate_random_point;
     use proofs::range_proof::RangeProof;
-    use num_traits::{One, Pow};
-
+    use curv::arithmetic::big_num::{One, Pow};
 
     pub fn test_helper(seed: &BigInt, n: usize, m: usize) {
         let nm = n * m;

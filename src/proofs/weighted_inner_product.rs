@@ -27,8 +27,8 @@ use curv::cryptographic_primitives::hashing::traits::*;
 use curv::elliptic::curves::traits::*;
 use curv::BigInt;
 use curv::{FE, GE};
+use curv::arithmetic::big_num::{One, Zero};
 use itertools::iterate;
-use num_traits::{One, Zero};
 
 use Errors::{self, WeightedInnerProdError};
 
@@ -544,7 +544,7 @@ mod tests {
     use proofs::range_proof::generate_random_point;
     use proofs::weighted_inner_product::weighted_inner_product;
     use proofs::weighted_inner_product::WeightedInnerProdArg;
-    use num_traits::{One, Zero};
+    use curv::arithmetic::big_num::{One, Zero};
 
     fn test_helper(n: usize) {
         let KZen: &[u8] = &[75, 90, 101, 110];

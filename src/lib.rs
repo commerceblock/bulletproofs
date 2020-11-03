@@ -20,8 +20,6 @@ extern crate serde;
 
 extern crate curv;
 extern crate itertools;
-extern crate num_traits;
-extern crate num_integer;
 
 pub mod proofs;
 

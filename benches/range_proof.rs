@@ -19,7 +19,6 @@ extern crate criterion;
 
 extern crate bulletproof;
 extern crate curv;
-extern crate num_traits;
 
 
 mod bench_range_proof {
@@ -31,7 +30,7 @@ mod bench_range_proof {
     use curv::cryptographic_primitives::hashing::traits::*;
     use curv::elliptic::curves::traits::*;
     use curv::{BigInt, FE, GE};
-    use num_traits::{One, Pow};
+    use curv::arithmetic::big_num::{One, Pow};
 
     static AGGREGATION_SIZES: [usize; 6] = [1, 2, 4, 8, 16, 32];
 
@@ -913,7 +912,7 @@ mod bench_wip_range_proof {
     use curv::arithmetic::traits::{Samplable, Converter};
     use curv::elliptic::curves::traits::*;
     use curv::{BigInt, FE, GE};
-    use num_traits::Pow;
+    use curv::arithmetic::big_num::Pow;
 
     static AGGREGATION_SIZES: [usize; 6] = [1, 2, 4, 8, 16, 32];
 

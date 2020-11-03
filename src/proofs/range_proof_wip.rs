@@ -29,8 +29,7 @@ use curv::cryptographic_primitives::hashing::traits::*;
 use curv::elliptic::curves::traits::*;
 use curv::BigInt;
 use curv::{FE, GE};
-use num_traits::{One, Zero};
-use num_integer::Integer;
+use curv::arithmetic::big_num::{One, Zero, Integer};
 use itertools::iterate;
 use proofs::range_proof::generate_random_point;
 use proofs::weighted_inner_product::WeightedInnerProdArg;
@@ -604,7 +603,7 @@ mod tests {
     use curv::BigInt;
     use curv::{FE, GE};
     use proofs::range_proof_wip::{RangeProofWIP, StatementRP};
-    use num_traits::Pow;
+    use curv::arithmetic::big_num::Pow;
 
     pub fn test_helper(seed: &BigInt, n: usize, m: usize) {
         // generate stmt

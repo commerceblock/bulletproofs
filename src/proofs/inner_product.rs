@@ -22,7 +22,7 @@ use curv::cryptographic_primitives::hashing::traits::*;
 use curv::elliptic::curves::traits::*;
 use curv::BigInt;
 use curv::{FE, GE};
-use num_traits::{One, Zero};
+use curv::arithmetic::big_num::{One, Zero};
 
 
 use Errors::{self, InnerProductError};
@@ -359,7 +359,7 @@ mod tests {
     use curv::elliptic::curves::traits::*;
     use curv::BigInt;
     use curv::{FE, GE};
-    use num_traits::{One, Zero};
+    use curv::arithmetic::big_num::{One, Zero};
     use proofs::inner_product::InnerProductArg;
     use proofs::range_proof::generate_random_point;
 
